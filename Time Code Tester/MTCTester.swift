@@ -23,9 +23,19 @@ class MTCTester {
         return
     }
     
+    var counter = 0 // We want to update the display every second, each iteration is 10 ms so the counter needs to go to 100 and then reset
+    var accumulatedOffset = 0.0
     var largestOffset = 0.0
     let expectedWait: UInt64 = 10000000 // the number of ns to wait for a quarter frame in 25 fps
     var lastTimeStamp: UInt64 = 0
+    
+    func nsToMs(ns: UInt64) -> Double {
+        return Double(ns) / 1000000.0
+    }
+    
+    func doubleToString(value: Double) -> String {
+        return String(format: "%.5f", value)
+    }
     
     // example msg <f10f>
     func handleMidiData(data: NSData) {
@@ -47,12 +57,26 @@ class MTCTester {
                     offset = expectedWait - elapsedTime
                     behind = false
                 }
-                let offsetPercent = (Double(offset) / Double(expectedWait)) * 100.0
-                let sign = behind ? "-" : "+" // - means we are behind, + ahead
-                let offsetString = "\(sign)\(offsetPercent)%"
+                            9961724
+                if offset > 1000000 {
+                    println("\(msg) - \(offset)")
+                }
+                
+                
+                let offsetPercent = nsToMs(offset)
+                let decimalOffset = behind ? -1 * offsetPercent : offsetPercent
                 largestOffset = offsetPercent > largestOffset ? offsetPercent : largestOffset
                 lastTimeStamp = currentTime
-                textUpdater(offsetString, "\(largestOffset)%")
+                accumulatedOffset += decimalOffset
+                if counter++ == 100 {
+                    let averageOffset = accumulatedOffset / 100
+                    let sign = averageOffset < 0 ? "" : "+"
+                    let offsetString = doubleToString(averageOffset)
+                    let offsetText = "\(sign)\(offsetString) ms"
+                    textUpdater(offsetText, "\(largestOffset) ms")
+                    counter = 0
+                    accumulatedOffset = 0
+                }
             }
         }
     }
