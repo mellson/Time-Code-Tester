@@ -27,7 +27,7 @@ void midiInputCallback(const MIDIPacketList *list, void *procRef, void *srcRef) 
     status = MIDIClientCreate(CFSTR("MIDI client"), NULL, NULL, &midiClient);
     NSCAssert(status == noErr, @"Error creating MIDI client: %d", status);
 
-    status = MIDIDestinationCreate(midiClient, CFSTR("Mellson Midi"), midiInputCallback, NULL, &midiIn);
+    status = MIDIDestinationCreate(midiClient, CFSTR("Time Code Tester"), midiInputCallback, NULL, &midiIn);
     NSCAssert(status == noErr, @"Error creating MIDI destination: %d", status);
     blockPrinter = printer;
 }
