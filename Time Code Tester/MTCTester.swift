@@ -26,7 +26,7 @@ class MTCTester {
     var counter = 0 // We want to update the display every second, each iteration is 10 ms so the counter needs to go to 100 and then reset
     var accumulatedOffset = 0.0
     var largestOffset = 0.0
-    let expectedWait: UInt64 = 10000000 // the number of ns to wait for a quarter frame in 25 fps
+    let expectedWait: UInt64 = 10 * NSEC_PER_MSEC // the number of ns to wait for a quarter frame in 25 fps
     var lastTimeStamp: UInt64 = 0
     
     func nsToMs(ns: UInt64) -> Double {
@@ -57,11 +57,6 @@ class MTCTester {
                     offset = expectedWait - elapsedTime
                     behind = false
                 }
-                            9961724
-                if offset > 1000000 {
-                    println("\(msg) - \(offset)")
-                }
-                
                 
                 let offsetPercent = nsToMs(offset)
                 let decimalOffset = behind ? -1 * offsetPercent : offsetPercent
@@ -75,6 +70,15 @@ class MTCTester {
                     let offsetText = "\(sign)\(offsetString) ms"
                     textUpdater(offsetText, "\(largestOffset) ms")
                     counter = 0
+                    accumulatedOffset = 0
+                }
+                
+                // If it was more than 3 seconds since last reception reset the tester
+                if elapsedTime > 3000 * NSEC_PER_MSEC {
+                    textUpdater("Reset", "Reset")
+                    lastTimeStamp = 0
+                    counter = 0
+                    largestOffset = 0
                     accumulatedOffset = 0
                 }
             }
